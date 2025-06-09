@@ -37,7 +37,7 @@ const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
                 <SelectValue placeholder="Toutes les villes" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Toutes les villes</SelectItem>
+                <SelectItem value="all">Toutes les villes</SelectItem>
                 <SelectItem value="paris">Paris</SelectItem>
                 <SelectItem value="lyon">Lyon</SelectItem>
                 <SelectItem value="marseille">Marseille</SelectItem>
@@ -53,7 +53,7 @@ const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
                 <SelectValue placeholder="Tous les départements" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous les départements</SelectItem>
+                <SelectItem value="all">Tous les départements</SelectItem>
                 <SelectItem value="75">Paris (75)</SelectItem>
                 <SelectItem value="69">Rhône (69)</SelectItem>
                 <SelectItem value="13">Bouches-du-Rhône (13)</SelectItem>
@@ -69,7 +69,7 @@ const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
                 <SelectValue placeholder="Tous les groupes" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous les groupes</SelectItem>
+                <SelectItem value="all">Tous les groupes</SelectItem>
                 <SelectItem value="lockers">Lockers</SelectItem>
                 <SelectItem value="points-relais">Points relais</SelectItem>
                 <SelectItem value="boutiques">Boutiques</SelectItem>

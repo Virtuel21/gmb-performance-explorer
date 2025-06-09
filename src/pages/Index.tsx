@@ -9,9 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const [filters, setFilters] = useState({
-    city: "",
-    department: "",
-    group: "",
+    city: "all",
+    department: "all",
+    group: "all",
     minScore: 0,
     period: "30"
   });
