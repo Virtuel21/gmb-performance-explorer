@@ -56,7 +56,7 @@ serve(async (req) => {
         client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET') ?? '',
         code: code,
         grant_type: 'authorization_code',
-        redirect_uri: `${url.origin}/functions/v1/google-oauth`,
+        redirect_uri: Deno.env.get('GOOGLE_REDIRECT_URI') ?? '',
       }),
     })
 

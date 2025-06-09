@@ -41,7 +41,7 @@ const GoogleAuth = () => {
     setIsLoading(true);
     try {
       // Rediriger vers l'OAuth Google
-      const redirectUrl = `${SUPABASE_URL}/functions/v1/google-oauth`;
+      const redirectUrl = `${window.location.origin}/auth/google/callback`;
       const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
       const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=https://www.googleapis.com/auth/business.manage&response_type=code&access_type=offline&prompt=consent`;
 
