@@ -30,8 +30,17 @@ serve(async (req) => {
     }
 
     const url = new URL(req.url)
-    const code = url.searchParams.get('code')
-    
+    let code = url.searchParams.get('code')
+
+    if (!code) {
+      try {
+        const body = await req.json()
+        code = body.code
+      } catch (_) {
+        // ignore body parse errors
+      }
+    }
+
     if (!code) {
       throw new Error('Code OAuth manquant')
     }
@@ -47,7 +56,7 @@ serve(async (req) => {
         client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET') ?? '',
         code: code,
         grant_type: 'authorization_code',
-        redirect_uri: `${url.origin}/auth/google/callback`,
+        redirect_uri: `${url.origin}/functions/v1/google-oauth`,
       }),
     })
 
