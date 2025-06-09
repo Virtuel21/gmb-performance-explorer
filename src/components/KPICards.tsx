@@ -2,6 +2,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, MessageSquare, Reply, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface KPICardsProps {
   filters: {
@@ -14,23 +16,89 @@ interface KPICardsProps {
 }
 
 const KPICards = ({ filters }: KPICardsProps) => {
-  // Données de démonstration (à remplacer par l'API réelle)
-  const kpiData = {
-    averageRating: 4.3,
-    totalReviews: 1247,
-    recentReviews: {
-      "7": 23,
-      "30": 89,
-      "90": 245
+  // Récupérer les données réelles depuis Supabase
+  const { data: reviewsData, isLoading } = useQuery({
+    queryKey: ['reviews-kpis', filters],
+    queryFn: async () => {
+      let query = supabase
+        .from('reviews')
+        .select(`
+          *,
+          business_locations!inner(
+            city,
+            department,
+            group_type
+          )
+        `)
+        .gte('review_date', new Date(Date.now() - parseInt(filters.period) * 24 * 60 * 60 * 1000).toISOString());
+
+      // Appliquer les filtres
+      if (filters.city !== 'all') {
+        query = query.eq('business_locations.city', filters.city);
+      }
+      if (filters.department !== 'all') {
+        query = query.eq('business_locations.department', filters.department);
+      }
+      if (filters.group !== 'all') {
+        query = query.eq('business_locations.group_type', filters.group);
+      }
+      if (filters.minScore > 0) {
+        query = query.gte('rating', filters.minScore);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
     },
-    responseRate: 78,
-    modificationRate: 12
+  });
+
+  const { data: totalReviewsData } = useQuery({
+    queryKey: ['total-reviews', filters],
+    queryFn: async () => {
+      let query = supabase
+        .from('reviews')
+        .select(`
+          *,
+          business_locations!inner(
+            city,
+            department,
+            group_type
+          )
+        `);
+
+      // Appliquer les filtres géographiques
+      if (filters.city !== 'all') {
+        query = query.eq('business_locations.city', filters.city);
+      }
+      if (filters.department !== 'all') {
+        query = query.eq('business_locations.department', filters.department);
+      }
+      if (filters.group !== 'all') {
+        query = query.eq('business_locations.group_type', filters.group);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Calculer les KPIs à partir des données réelles
+  const kpiData = {
+    averageRating: reviewsData && reviewsData.length > 0 
+      ? reviewsData.reduce((sum, review) => sum + review.rating, 0) / reviewsData.length 
+      : 0,
+    totalReviews: totalReviewsData?.length || 0,
+    recentReviews: reviewsData?.length || 0,
+    responseRate: reviewsData && reviewsData.length > 0
+      ? (reviewsData.filter(review => review.response_text).length / reviewsData.length) * 100
+      : 0
   };
 
   const cards = [
     {
       title: "Note moyenne",
-      value: kpiData.averageRating.toFixed(1),
+      value: kpiData.averageRating > 0 ? kpiData.averageRating.toFixed(1) : "N/A",
       icon: Star,
       trend: "+0.2",
       trendLabel: "vs mois dernier",
@@ -48,7 +116,7 @@ const KPICards = ({ filters }: KPICardsProps) => {
     },
     {
       title: `Avis (${filters.period}j)`,
-      value: kpiData.recentReviews[filters.period as keyof typeof kpiData.recentReviews],
+      value: kpiData.recentReviews,
       icon: TrendingUp,
       trend: "+8%",
       trendLabel: "vs période précédente",
@@ -57,7 +125,7 @@ const KPICards = ({ filters }: KPICardsProps) => {
     },
     {
       title: "Taux de réponse",
-      value: `${kpiData.responseRate}%`,
+      value: `${kpiData.responseRate.toFixed(0)}%`,
       icon: Reply,
       trend: "+5%",
       trendLabel: "vs mois dernier",
@@ -65,6 +133,24 @@ const KPICards = ({ filters }: KPICardsProps) => {
       bgColor: "bg-purple-50"
     }
   ];
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader className="space-y-0 pb-2">
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-full"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

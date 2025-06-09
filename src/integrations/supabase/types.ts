@@ -9,7 +9,192 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      business_locations: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          department: string | null
+          google_account_id: string
+          group_type: string | null
+          id: string
+          is_active: boolean | null
+          location_id: string
+          name: string
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          department?: string | null
+          google_account_id: string
+          group_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          location_id: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          department?: string | null
+          google_account_id?: string
+          group_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          location_id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_locations_google_account_id_fkey"
+            columns: ["google_account_id"]
+            isOneToOne: false
+            referencedRelation: "google_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_metrics: {
+        Row: {
+          actions: number | null
+          calls: number | null
+          created_at: string
+          date: string
+          direction_requests: number | null
+          id: string
+          location_id: string
+          searches: number | null
+          views: number | null
+          website_clicks: number | null
+        }
+        Insert: {
+          actions?: number | null
+          calls?: number | null
+          created_at?: string
+          date: string
+          direction_requests?: number | null
+          id?: string
+          location_id: string
+          searches?: number | null
+          views?: number | null
+          website_clicks?: number | null
+        }
+        Update: {
+          actions?: number | null
+          calls?: number | null
+          created_at?: string
+          date?: string
+          direction_requests?: number | null
+          id?: string
+          location_id?: string
+          searches?: number | null
+          views?: number | null
+          website_clicks?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_metrics_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "business_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_accounts: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          email: string
+          google_account_id: string
+          id: string
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          email: string
+          google_account_id: string
+          id?: string
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          email?: string
+          google_account_id?: string
+          id?: string
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          author_name: string | null
+          comment: string | null
+          created_at: string
+          google_review_id: string
+          id: string
+          location_id: string
+          rating: number
+          response_date: string | null
+          response_text: string | null
+          review_date: string
+        }
+        Insert: {
+          author_name?: string | null
+          comment?: string | null
+          created_at?: string
+          google_review_id: string
+          id?: string
+          location_id: string
+          rating: number
+          response_date?: string | null
+          response_text?: string | null
+          review_date: string
+        }
+        Update: {
+          author_name?: string | null
+          comment?: string | null
+          created_at?: string
+          google_review_id?: string
+          id?: string
+          location_id?: string
+          rating?: number
+          response_date?: string | null
+          response_text?: string | null
+          review_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "business_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

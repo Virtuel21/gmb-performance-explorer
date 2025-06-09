@@ -5,6 +5,7 @@ import KPICards from "@/components/KPICards";
 import ChartsSection from "@/components/ChartsSection";
 import ReviewsTable from "@/components/ReviewsTable";
 import FilterPanel from "@/components/FilterPanel";
+import GoogleAuth from "@/components/GoogleAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
@@ -20,6 +21,8 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-6 space-y-6">
         <DashboardHeader />
+        
+        <GoogleAuth />
         
         <FilterPanel filters={filters} onFiltersChange={setFilters} />
         
