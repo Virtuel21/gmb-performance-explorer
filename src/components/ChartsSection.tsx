@@ -1,10 +1,24 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import type { Filters } from "@/components/FilterPanel";
 
 interface ChartsSectionProps {
   type: "ratings" | "reviews" | "evolution" | "geographic";
-  filters: any;
+  filters: Filters;
 }
 
 const ChartsSection = ({ type, filters }: ChartsSectionProps) => {

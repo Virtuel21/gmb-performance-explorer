@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, SUPABASE_URL } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Chrome, RefreshCw, Unlink } from "lucide-react";
 
@@ -41,9 +41,10 @@ const GoogleAuth = () => {
     setIsLoading(true);
     try {
       // Rediriger vers l'OAuth Google
-      const redirectUrl = `${window.location.origin}/auth/google/callback`;
-      const googleAuthUrl = `https://accounts.google.com/oauth/authorize?client_id=YOUR_GOOGLE_CLIENT_ID&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=https://www.googleapis.com/auth/business.manage&response_type=code&access_type=offline&prompt=consent`;
-      
+      const redirectUrl = `${SUPABASE_URL}/functions/v1/google-oauth`;
+      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=https://www.googleapis.com/auth/business.manage&response_type=code&access_type=offline&prompt=consent`;
+
       window.location.href = googleAuthUrl;
     } catch (error) {
       console.error('Erreur lors de la connexion Google:', error);

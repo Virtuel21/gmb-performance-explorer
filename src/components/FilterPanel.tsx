@@ -5,19 +5,21 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Filter } from "lucide-react";
 
+export interface Filters {
+  city: string;
+  department: string;
+  group: string;
+  minScore: number;
+  period: string;
+}
+
 interface FilterPanelProps {
-  filters: {
-    city: string;
-    department: string;
-    group: string;
-    minScore: number;
-    period: string;
-  };
-  onFiltersChange: (filters: any) => void;
+  filters: Filters;
+  onFiltersChange: (filters: Filters) => void;
 }
 
 const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
-  const updateFilter = (key: string, value: any) => {
+  const updateFilter = <K extends keyof Filters>(key: K, value: Filters[K]) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
