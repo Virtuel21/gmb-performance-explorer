@@ -40,6 +40,11 @@ const GoogleAuth = () => {
   const connectGoogle = async () => {
     setIsLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = "/login";
+        return;
+      }
       // Rediriger vers l'OAuth Google
       const redirectUrl = `${window.location.origin}/auth/google/callback`;
       const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
