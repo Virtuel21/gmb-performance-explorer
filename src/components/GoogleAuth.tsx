@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +20,11 @@ const GoogleAuth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchGoogleAccounts();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        fetchGoogleAccounts();
+      }
+    });
   }, []);
 
   const fetchGoogleAccounts = async () => {
@@ -43,11 +46,21 @@ const GoogleAuth = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         window.location.href = "/login";
+        setIsLoading(false);
         return;
       }
       // Rediriger vers l'OAuth Google
       const redirectUrl = `${window.location.origin}/auth/google/callback`;
       const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      if (!googleClientId) {
+        toast({
+          title: "Configuration manquante",
+          description: "VITE_GOOGLE_CLIENT_ID n'est pas défini",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
       const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=https://www.googleapis.com/auth/business.manage&response_type=code&access_type=offline&prompt=consent`;
 
       window.location.href = googleAuthUrl;
@@ -186,7 +199,7 @@ const GoogleAuth = () => {
               {isSyncing ? (
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-4 w-4" />
               )}
               Synchroniser les données
             </Button>
