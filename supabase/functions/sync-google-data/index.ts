@@ -23,6 +23,13 @@ serve(async (req) => {
       }
     )
 
+    const googleClientId = Deno.env.get('GOOGLE_CLIENT_ID')
+    const googleClientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET')
+
+    if (!googleClientId || !googleClientSecret) {
+      throw new Error('Variables d\'environnement Google OAuth manquantes')
+    }
+
     const { data: { user } } = await supabaseClient.auth.getUser()
     
     if (!user) {
@@ -50,8 +57,8 @@ serve(async (req) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
-            client_id: Deno.env.get('GOOGLE_CLIENT_ID') ?? '',
-            client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET') ?? '',
+            client_id: googleClientId,
+            client_secret: googleClientSecret,
             refresh_token: account.refresh_token,
             grant_type: 'refresh_token',
           }),
