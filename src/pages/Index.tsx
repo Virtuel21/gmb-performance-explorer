@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [filters, setFilters] = useState({
     city: "all",
     department: "all",
@@ -24,9 +25,15 @@ const Index = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate("/login");
+      } else {
+        setIsCheckingAuth(false);
       }
     });
   }, [navigate]);
+
+  if (isCheckingAuth) {
+    return <p className="p-4">Chargement...</p>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
