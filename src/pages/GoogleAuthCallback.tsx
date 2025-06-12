@@ -14,15 +14,29 @@ const GoogleAuthCallback = () => {
       return;
     }
 
+    interface GoogleOAuthResponse {
+      success?: boolean;
+      email?: string;
+      error?: string;
+    }
+
     const finishAuth = async () => {
-      const { data, error } = await supabase.functions.invoke("google-oauth", {
+      const { data, error } = await supabase.functions.invoke<GoogleOAuthResponse>("google-oauth", {
         body: { code },
       });
 
       if (error) {
+        console.error("Invocation google-oauth échouée:", error);
         toast({
           title: "Erreur",
-          description: "Impossible de connecter Google",
+          description: error.message || "Impossible de connecter Google",
+          variant: "destructive",
+        });
+      } else if (data && data.error) {
+        console.error("Erreur retournée par google-oauth:", data.error);
+        toast({
+          title: "Erreur",
+          description: data.error,
           variant: "destructive",
         });
       } else {

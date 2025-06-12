@@ -45,6 +45,17 @@ serve(async (req) => {
       throw new Error('Code OAuth manquant')
     }
 
+    console.log('OAuth callback code:', code)
+
+    // Vérifier la présence des variables d'environnement nécessaires
+    const clientId = Deno.env.get('GOOGLE_CLIENT_ID') ?? ''
+    const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET') ?? ''
+    const redirectUri = Deno.env.get('GOOGLE_REDIRECT_URI') ?? ''
+
+    if (!clientId || !clientSecret || !redirectUri) {
+      throw new Error('Variables d\'environnement Google OAuth manquantes')
+    }
+
     // Échanger le code contre un token d'accès
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -52,15 +63,16 @@ serve(async (req) => {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: Deno.env.get('GOOGLE_CLIENT_ID') ?? '',
-        client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET') ?? '',
+        client_id: clientId,
+        client_secret: clientSecret,
         code: code,
         grant_type: 'authorization_code',
-        redirect_uri: Deno.env.get('GOOGLE_REDIRECT_URI') ?? '',
+        redirect_uri: redirectUri,
       }),
     })
 
     const tokenData = await tokenResponse.json()
+    console.log('Token response status:', tokenResponse.status)
     
     if (!tokenResponse.ok) {
       throw new Error(`Erreur OAuth: ${tokenData.error_description}`)
@@ -74,6 +86,7 @@ serve(async (req) => {
     })
 
     const profileData = await profileResponse.json()
+    console.log('Profile response status:', profileResponse.status)
 
     // Calculer la date d'expiration du token
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000)
@@ -106,8 +119,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Erreur OAuth Google:', error)
+    const message = error instanceof Error ? error.message : String(error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
