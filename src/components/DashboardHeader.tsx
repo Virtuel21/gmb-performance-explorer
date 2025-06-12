@@ -1,9 +1,14 @@
 
-import { Building2, TrendingUp, Shield } from "lucide-react";
+import { Building2, TrendingUp, Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 const DashboardHeader = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  };
   return (
     <div className="bg-white rounded-xl shadow-sm border p-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -29,6 +34,9 @@ const DashboardHeader = () => {
           <Button className="bg-blue-600 hover:bg-blue-700">
             <TrendingUp className="h-4 w-4 mr-2" />
             Exporter les données
+          </Button>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </div>
