@@ -71,3 +71,15 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Google OAuth configuration
+
+Les fonctions Edge `google-oauth` et `sync-google-data` nécessitent plusieurs variables d'environnement pour fonctionner correctement. Assurez‑vous de définir les variables suivantes dans votre projet Supabase :
+
+```
+GOOGLE_CLIENT_ID=<id client Google>
+GOOGLE_CLIENT_SECRET=<secret client Google>
+GOOGLE_REDIRECT_URI=<URL de rappel utilisée pour l’authentification>
+```
+
+Ces valeurs doivent correspondre à la configuration de votre application Google Cloud et à l'URL utilisée lors de la redirection dans l'interface (`/auth/google/callback`).
