@@ -83,3 +83,5 @@ GOOGLE_REDIRECT_URI=<URL de rappel utilisée pour l’authentification>
 ```
 
 Ces valeurs doivent correspondre à la configuration de votre application Google Cloud et à l'URL utilisée lors de la redirection dans l'interface (`/auth/google/callback`).
+
+La fonction `sync-google-data` interroge également l'API `businessprofileperformance` pour récupérer les métriques quotidiennes des établissements (clics vers le site, appels, demandes d'itinéraire, impressions, etc.). Assurez‑vous que votre application possède le scope `https://www.googleapis.com/auth/business.manage`.
