@@ -2,6 +2,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+interface DailyMetricRecord {
+  location_id: string
+  date: string
+  views?: number
+  searches?: number
+  actions?: number
+  calls?: number
+  direction_requests?: number
+  website_clicks?: number
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -114,7 +125,7 @@ serve(async (req) => {
 
           if (reviewsResponse.ok) {
             const reviewsData = await reviewsResponse.json()
-            
+
             for (const review of reviewsData.reviews || []) {
               await supabaseClient
                 .from('reviews')
@@ -130,6 +141,86 @@ serve(async (req) => {
                 }, {
                   onConflict: 'location_id,google_review_id'
                 })
+            }
+          }
+
+          // Récupérer les métriques de performance quotidiennes (30 derniers jours)
+          const startDate = new Date()
+          startDate.setDate(startDate.getDate() - 30)
+          const endDate = new Date()
+
+          const metricsUrl = new URL(`https://businessprofileperformance.googleapis.com/v1/${location.name}:fetchMultiDailyMetricsTimeSeries`)
+          const metrics = [
+            'WEBSITE_CLICKS',
+            'CALL_CLICKS',
+            'BUSINESS_DIRECTION_REQUESTS',
+            'BUSINESS_IMPRESSIONS_DESKTOP_MAPS',
+            'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH',
+            'BUSINESS_IMPRESSIONS_MOBILE_MAPS',
+            'BUSINESS_IMPRESSIONS_MOBILE_SEARCH',
+          ]
+          for (const m of metrics) {
+            metricsUrl.searchParams.append('dailyMetrics', m)
+          }
+          metricsUrl.searchParams.append('dailyRange.start_date.year', startDate.getUTCFullYear().toString())
+          metricsUrl.searchParams.append('dailyRange.start_date.month', (startDate.getUTCMonth() + 1).toString())
+          metricsUrl.searchParams.append('dailyRange.start_date.day', startDate.getUTCDate().toString())
+          metricsUrl.searchParams.append('dailyRange.end_date.year', endDate.getUTCFullYear().toString())
+          metricsUrl.searchParams.append('dailyRange.end_date.month', (endDate.getUTCMonth() + 1).toString())
+          metricsUrl.searchParams.append('dailyRange.end_date.day', endDate.getUTCDate().toString())
+
+          const metricsResponse = await fetch(metricsUrl.toString(), {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+            },
+          })
+
+          if (metricsResponse.ok) {
+            const metricsData = await metricsResponse.json()
+
+            const series = metricsData.timeSeries || metricsData.locationMetrics?.[0]?.timeSeries || []
+            const dailyMap: Record<string, DailyMetricRecord> = {}
+
+            for (const entry of series) {
+              const metric = entry.dailyMetric || entry.metric
+              const values = entry.timeSeries?.datedValues || entry.timeSeries || []
+              for (const point of values) {
+                const dateObj = point.date || point.time || point.startDate || point.timeDimension?.timeRange?.startTime
+                if (!dateObj) continue
+                const date = typeof dateObj === 'string' ? dateObj.split('T')[0] : `${dateObj.year}-${String(dateObj.month).padStart(2, '0')}-${String(dateObj.day).padStart(2, '0')}`
+                if (!dailyMap[date]) {
+                  dailyMap[date] = { location_id: location.name, date }
+                }
+                const rec = dailyMap[date]
+                switch (metric) {
+                  case 'WEBSITE_CLICKS':
+                    rec.website_clicks = (rec.website_clicks || 0) + (Number(point.value) || 0)
+                    rec.actions = (rec.actions || 0) + (Number(point.value) || 0)
+                    break
+                  case 'CALL_CLICKS':
+                    rec.calls = (rec.calls || 0) + (Number(point.value) || 0)
+                    rec.actions = (rec.actions || 0) + (Number(point.value) || 0)
+                    break
+                  case 'BUSINESS_DIRECTION_REQUESTS':
+                    rec.direction_requests = (rec.direction_requests || 0) + (Number(point.value) || 0)
+                    rec.actions = (rec.actions || 0) + (Number(point.value) || 0)
+                    break
+                  case 'BUSINESS_IMPRESSIONS_DESKTOP_MAPS':
+                  case 'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH':
+                  case 'BUSINESS_IMPRESSIONS_MOBILE_MAPS':
+                  case 'BUSINESS_IMPRESSIONS_MOBILE_SEARCH':
+                    rec.views = (rec.views || 0) + (Number(point.value) || 0)
+                    break
+                  default:
+                    break
+                }
+              }
+            }
+
+            for (const day of Object.values(dailyMap)) {
+              await supabaseClient
+                .from('daily_metrics')
+                .upsert(day as DailyMetricRecord, { onConflict: 'location_id,date' })
             }
           }
         }
