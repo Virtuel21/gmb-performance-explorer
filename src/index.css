@@ -100,4 +100,8 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  #root {
+    @apply min-h-screen overflow-y-auto;
+  }
 }
